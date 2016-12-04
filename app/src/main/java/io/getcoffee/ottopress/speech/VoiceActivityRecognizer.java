@@ -4,6 +4,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.media.audiofx.NoiseSuppressor;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -48,11 +49,18 @@ public class VoiceActivityRecognizer {
     }
 
     private void createAudioRecord() {
+        final int encoding;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            encoding = AudioFormat.ENCODING_PCM_FLOAT;
+        } else {
+            encoding = AudioFormat.ENCODING_PCM_16BIT;
+        }
+
         for(int sampleRate : RECORDER_SAMPLERATES) {
             int internalBufferSize = AudioRecord.getMinBufferSize(
                     sampleRate,
                     AudioFormat.CHANNEL_IN_MONO,
-                    AudioFormat.ENCODING_PCM_FLOAT);
+                    encoding);
             if(internalBufferSize == AudioRecord.ERROR_BAD_VALUE) {
                 continue;
             }
@@ -62,7 +70,7 @@ public class VoiceActivityRecognizer {
                     MediaRecorder.AudioSource.MIC,
                     sampleRate,
                     AudioFormat.CHANNEL_IN_MONO,
-                    AudioFormat.ENCODING_PCM_FLOAT,
+                    encoding,
                     internalBufferSize);
             if(tempAudioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
                 audioBufferSize = bufferSize;

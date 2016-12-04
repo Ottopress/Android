@@ -14,7 +14,7 @@ public class BackgroundRecognizerFactory {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return new MarshmallowBackgroundRecognizer(audioRecord, audioBufferSize, lock);
         } else {
-            return new LegacyBackgroundRecognizer();
+            return new LegacyBackgroundRecognizer(audioRecord, audioBufferSize, lock);
         }
     }
 
