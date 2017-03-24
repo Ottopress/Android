@@ -7,6 +7,9 @@ import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
 import android.util.Log;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 /**
  * Created by howard on 11/23/16.
  */
@@ -15,71 +18,66 @@ public class VoiceActivityRecognizer {
 
     final static String tag = VoiceActivityRecognizer.class.getSimpleName();
 
-    private AudioRecord audioRecord = null;
-    private int audioBufferSize;
-
-    private final int[] RECORDER_SAMPLERATES = new int[]{11025, 22050, 44100, 16000};
-
-    private final Object lock = new Object();
+    public final Collection<RecognitionListener> listeners = new HashSet<RecognitionListener>();
 
     private BackgroundRecognizer backgroundRecognizer;
 
-    public VoiceActivityRecognizer() {
-        createAudioRecord();
+    final Object lock = new Object();
+
+    final AudioRecord audioRecord;
+    int audioBufferSize;
+
+    public VoiceActivityRecognizer(AudioRecord audioRecord) {
+        this.audioRecord = audioRecord;
+        this.audioBufferSize = (int) Math.pow(2,Math.round(Math.log(audioRecord.getSampleRate()/50)/Math.log(2)));
         if (NoiseSuppressor.isAvailable()) {
             NoiseSuppressor noiseSuppressor = NoiseSuppressor.create(audioRecord.getAudioSessionId());
             if(noiseSuppressor != null && !noiseSuppressor.getEnabled()) {
                 noiseSuppressor.setEnabled(true);
             }
         }
-
-        backgroundRecognizer = BackgroundRecognizerFactory.create(audioRecord, audioBufferSize, lock);
     }
 
     public void start() {
+        Log.wtf(tag, "Starting VAD");
+        if(backgroundRecognizer != null) {
+            Log.wtf(tag, "VAD NULL!");
+            return;
+        }
         synchronized (lock) {
+            backgroundRecognizer = BackgroundRecognizerFactory.create(this);
             backgroundRecognizer.start();
+            Log.wtf(tag, "Stuff started");
         }
     }
 
     public void stop() {
+        if(backgroundRecognizer == null) {
+            return;
+        }
         synchronized (lock) {
-            backgroundRecognizer.interrupt();
+            try {
+                backgroundRecognizer.interrupt();
+                backgroundRecognizer.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        }
+
+        backgroundRecognizer = null;
+    }
+
+    public void addListener(RecognitionListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
         }
     }
 
-    private void createAudioRecord() {
-        final int encoding;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            encoding = AudioFormat.ENCODING_PCM_FLOAT;
-        } else {
-            encoding = AudioFormat.ENCODING_PCM_16BIT;
+    public void removeListener(RecognitionListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
         }
-
-        for(int sampleRate : RECORDER_SAMPLERATES) {
-            int internalBufferSize = AudioRecord.getMinBufferSize(
-                    sampleRate,
-                    AudioFormat.CHANNEL_IN_MONO,
-                    encoding);
-            if(internalBufferSize == AudioRecord.ERROR_BAD_VALUE) {
-                continue;
-            }
-            int bufferSize = (int) Math.pow(2,Math.round(Math.log(sampleRate/10)/Math.log(2)));
-            Log.wtf(VoiceActivityRecognizer.tag, "Got internal buffer size: " + internalBufferSize);
-            AudioRecord tempAudioRecord = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
-                    sampleRate,
-                    AudioFormat.CHANNEL_IN_MONO,
-                    encoding,
-                    internalBufferSize);
-            if(tempAudioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
-                audioBufferSize = bufferSize;
-                audioRecord = tempAudioRecord;
-                return;
-            }
-            tempAudioRecord.release();
-        }
-        return;
     }
 
 }

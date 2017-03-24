@@ -6,11 +6,12 @@ import android.media.AudioRecord;
  * Created by howard on 12/4/16.
  */
 
-public class LegacyBackgroundRecognizer extends BackgroundRecognizer {
+class LegacyBackgroundRecognizer extends BackgroundRecognizer {
 
-    private final AudioRecord audioRecord;
+    private final VoiceActivityRecognizer activityRecognizer;
 
-    LegacyBackgroundRecognizer(AudioRecord audioRecord, int audioBufferSize, Object lock) {
-        this.audioRecord = audioRecord;
+    LegacyBackgroundRecognizer(VoiceActivityRecognizer activityRecognizer) {
+        super(activityRecognizer.listeners);
+        this.activityRecognizer = activityRecognizer;
     }
 }
