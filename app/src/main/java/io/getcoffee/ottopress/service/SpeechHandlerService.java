@@ -1,12 +1,10 @@
 package io.getcoffee.ottopress.service;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;

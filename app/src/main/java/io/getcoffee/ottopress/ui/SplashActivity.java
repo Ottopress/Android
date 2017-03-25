@@ -27,8 +27,6 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
-        Log.wtf("Splash", "It got to here");
-
         startService(new Intent(getApplicationContext(), SpeechHandlerService.class));
     }
 

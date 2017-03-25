@@ -6,6 +6,6 @@ import java.io.FileFilter;
 class JarFilter implements FileFilter {
     @Override
     public boolean accept(File pathname) {
-        return pathname.toString().endsWith(".jar");
+        return pathname.toString().endsWith(".jar") || pathname.toString().endsWith(".apk");
     }
 }

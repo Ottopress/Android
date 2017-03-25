@@ -18,6 +18,18 @@ public abstract class Module {
     public abstract Drawable getMenuIcon();
     public abstract Fragment buildFragment(Device device);
 
+    public String getAuthor() {
+        return this.getClass().getAnnotation(Ottomodule.class).author();
+    }
+
+    public String getDevice() {
+        return this.getClass().getAnnotation(Ottomodule.class).device();
+    }
+
+    public String getVersion() {
+        return this.getClass().getAnnotation(Ottomodule.class).version();
+    }
+
     @Target(ElementType.CONSTRUCTOR)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Ottomodule {

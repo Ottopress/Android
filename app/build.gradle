@@ -25,8 +25,18 @@ protobuf {
         artifact = 'com.google.protobuf:protoc:3.0.0'
     }
     plugins {
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
         grpc {
             artifact = 'io.grpc:protoc-gen-grpc-java:0.15.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                javalite { }
+            }
         }
     }
 }

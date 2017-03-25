@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<types>
+    <type>
+        <name>Bedroom</name>
+        <icon>bedroom</icon>
+    </type>
+    <type>
+        <name>Kitchen</name>
+        <icon>kitchen</icon>
+    </type>
+</types>
